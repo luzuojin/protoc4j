@@ -1,0 +1,35 @@
+<idea-plugin>
+    <id>dev.xframe.protoc4j</id>
+    <name>Protoc</name>
+    <vendor email="luzuojin@gmail.com" url="https://www.github.com/luzuojin">luzj</vendor>
+
+    <description>
+        <![CDATA[
+            Compile .proto to Java via protoc <br/>
+            Built-in protoc version 3.13.0 include macos & windows
+        ]]>
+    </description>
+
+    <!-- please see https://plugins.jetbrains.com/docs/intellij/plugin-compatibility.html on how to target different products -->
+    <depends>com.intellij.modules.platform</depends>
+
+    <extensions defaultExtensionNs="com.intellij">
+        <applicationConfigurable parentId="tools"
+                                 id="dev.xframe.protoc4j.ProtocConfigurable"
+                                 instance="dev.xframe.protoc4j.ProtocConfigurable"
+                                 displayName="Protoc config"/>
+        <applicationService serviceImplementation="dev.xframe.protoc4j.ProtocConfigState"/>
+    </extensions>
+
+    <actions>
+        <!-- Add your actions here -->
+        <action id="dev.xframe.protoc4j.ProtocGenerateAction" class="dev.xframe.protoc4j.ProtocGenerateAction" text="Protoc"
+                description="Compile.proto to Java via protoc">
+            <add-to-group group-id="ToolsMenu" anchor="first"/>
+            <add-to-group group-id="GenerateGroup" anchor="first"/>
+            <add-to-group group-id="EditorPopupMenu1.FindRefactor" anchor="after" relative-to-action="RefactoringMenu"/>
+            <add-to-group group-id="ProjectViewPopupMenu" anchor="after" relative-to-action="ProjectViewPopupMenuRefactoringGroup"/>
+            <keyboard-shortcut first-keystroke="ctrl shift P" keymap="$default"/>
+        </action>
+    </actions>
+</idea-plugin>
