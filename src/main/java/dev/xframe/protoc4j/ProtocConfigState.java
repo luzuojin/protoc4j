@@ -32,7 +32,7 @@ public class ProtocConfigState implements PersistentStateComponent<ProtocConfigS
         if(Strings.isEmptyOrSpaces(outdir)) {
             return Arrays.asList(DefaultOutDirs);
         }
-        return Stream.concat(Arrays.asList(outdir).stream(), Arrays.asList(DefaultOutDirs).stream()).distinct().collect(Collectors.toList());
+        return Stream.concat(Stream.of(outdir), Stream.of(DefaultOutDirs)).distinct().collect(Collectors.toList());
     }
 
     public List<String> getOptions() {

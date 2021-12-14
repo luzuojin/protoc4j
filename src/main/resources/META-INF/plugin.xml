@@ -5,8 +5,11 @@
 
     <description>
         <![CDATA[
-            Compile .proto to Java via protoc <br/>
-            Built-in protoc version 3.13.0 include macos & windows
+            Generate java code from .proto file same as execute "protoc --java_out=" in command line.<br/>
+            Use key[cmd+shift+p] or idea generate menu to trigger action.<br/>
+            Default out dir is src/main/proto if exists.<br/>
+            Settings in Tools->Protoc Configuration. <br/>
+            Built-in protoc version 3.13.0 include macos & windows.<br/>
         ]]>
     </description>
 
