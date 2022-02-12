@@ -9,12 +9,16 @@ import com.intellij.openapi.module.Module;
 import com.intellij.openapi.roots.ModuleRootManager;
 import com.intellij.openapi.roots.ProjectFileIndex;
 import com.intellij.openapi.ui.Messages;
+import com.intellij.openapi.vfs.LocalFileSystem;
 import com.intellij.openapi.vfs.VirtualFile;
 import org.jetbrains.annotations.NotNull;
 
 import java.io.PrintWriter;
 import java.io.StringWriter;
-import java.util.*;
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.List;
+import java.util.Objects;
 import java.util.stream.Collectors;
 
 public class ProtocGenerateAction extends AnAction {
@@ -32,7 +36,7 @@ public class ProtocGenerateAction extends AnAction {
             try {
                 Module module = PlatformDataKeys.MODULE.getData(dataCtx);
                 ProtocConfigState config = ProtocConfigState.getInstance();//get from data
-                VirtualFile outDir = getOutputDir(module, config, file);
+                VirtualFile outDir = getOutputDir(module, config);
                 List<VirtualFile> inDirs = getInputDirs(module, file);
                 ProtocExecutor.ExecResp resp = ProtocExecutor.exec(config, inDirs.stream().map(VirtualFile::getPath).collect(Collectors.toList()), outDir.getPath(), file.getPath());
                 if(resp.ok)
@@ -57,13 +61,21 @@ public class ProtocGenerateAction extends AnAction {
         return conentRoots.stream().map(f->f.findFileByRelativePath(protoRelative)).filter(Objects::nonNull).collect(Collectors.toList());
     }
 
-    private VirtualFile getOutputDir(Module module, ProtocConfigState config, VirtualFile protoFile) {
+    private VirtualFile getOutputDir(Module module, ProtocConfigState config) {
+        return config.getPossibleOutDirs().stream()
+                .map(path->this.getOutputDir(module, path))
+                .filter(Objects::nonNull)
+                .findFirst()
+                .orElseThrow(()->new IllegalStateException(String.format("Protoc out dir not found in module[%s]", module.getName())));
+    }
+    private VirtualFile getOutputDir(Module module, String possiblePath) {
         for (VirtualFile contentRoot : ModuleRootManager.getInstance(module).getContentRoots()) {
-            Optional<VirtualFile> out = config.getPossibleOutDirs().stream().map(contentRoot::findFileByRelativePath).filter(Objects::nonNull).findFirst();
-            if(out.isPresent())
-                return out.get();
+            VirtualFile out = contentRoot.findFileByRelativePath(possiblePath);
+            if(out != null) {
+                return out;
+            }
         }
-        throw new IllegalStateException(String.format("Protoc out dir not found in module[%s]", module.getName()));
+        return LocalFileSystem.getInstance().findFileByPath(possiblePath);
     }
 
     private boolean isProtoFile(VirtualFile file) {
