@@ -12,6 +12,7 @@ intellij {
 }
 patchPluginXml {
     changeNotes = """
+    1.0.3: Add builtin macos arm protoc
     1.0.2: Fix idea version compatible
     1.0.1: Fix when output dir is System Path
     """

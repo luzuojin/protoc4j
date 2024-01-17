@@ -9,6 +9,7 @@ import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.util.Arrays;
 import java.util.List;
+import java.util.Optional;
 import java.util.stream.Collectors;
 
 public class ProtocExecutor {
@@ -39,8 +40,8 @@ public class ProtocExecutor {
         if(!Strings.isEmpty(config.protoc) && Files.exists(Paths.get(config.protoc))) {
             return config.protoc;
         }
-        boolean isWindows = System.getProperty("os.name").toLowerCase().startsWith("windows");
-        String protocOriginName = (isWindows ? "protoc.exe" : "protoc");
+        boolean isWindows = isWindows();
+        String protocOriginName = (isWindows ? "protoc.exe" : (isArm() ? "protoc_arm" : "protoc"));
         String protocTargetName = "xframe_" + protocOriginName;
         Path protocPath = Paths.get(FileUtilRt.getTempDirectory(), protocTargetName);
         if(!Files.exists(protocPath)) {//create temporal file
@@ -56,6 +57,14 @@ public class ProtocExecutor {
         }
         return protocPath.toFile().getPath();
     }
+
+    private static boolean isWindows() {
+        return System.getProperty("os.name").toLowerCase().startsWith("windows");
+    }
+    private static boolean isArm() {
+        return Optional.ofNullable(System.getProperty("os.arch")).filter(v -> v.toLowerCase().contains("arm") || v.equalsIgnoreCase("aarch64")).isPresent();
+    }
+
 
     private static ExecResp invokeCmd(String cmd) throws IOException, InterruptedException {
         Process pr = Runtime.getRuntime().exec(cmd);

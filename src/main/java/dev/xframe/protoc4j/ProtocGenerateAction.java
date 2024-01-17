@@ -10,6 +10,7 @@ import com.intellij.openapi.roots.ModuleRootManager;
 import com.intellij.openapi.roots.ProjectFileIndex;
 import com.intellij.openapi.ui.Messages;
 import com.intellij.openapi.vfs.LocalFileSystem;
+import com.intellij.openapi.vfs.VfsUtil;
 import com.intellij.openapi.vfs.VirtualFile;
 import org.jetbrains.annotations.NotNull;
 
@@ -40,7 +41,7 @@ public class ProtocGenerateAction extends AnAction {
                 List<VirtualFile> inDirs = getInputDirs(module, file);
                 ProtocExecutor.ExecResp resp = ProtocExecutor.exec(config, inDirs.stream().map(VirtualFile::getPath).collect(Collectors.toList()), outDir.getPath(), file.getPath());
                 if(resp.ok)
-                    outDir.refresh(true, true);
+                    VfsUtil.markDirtyAndRefresh(true, true,true, outDir);
                 Messages.showMessageDialog(e.getProject(), resp.msg, e.getPresentation().getText(), e.getPresentation().getIcon());
             } catch (Throwable ex) {
                 Messages.showMessageDialog(e.getProject(), throwableToString(ex), e.getPresentation().getText(), e.getPresentation().getIcon());
