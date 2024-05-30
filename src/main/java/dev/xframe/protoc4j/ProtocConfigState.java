@@ -28,6 +28,8 @@ public class ProtocConfigState implements PersistentStateComponent<ProtocConfigS
 
     public List<String> options = Arrays.asList("--experimental_allow_proto3_optional");
 
+    public boolean showCmd;
+
     public List<String> getPossibleOutDirs() {
         if(Strings.isEmptyOrSpaces(outdir)) {
             return Arrays.asList(DefaultOutDirs);

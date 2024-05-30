@@ -7,6 +7,7 @@ import org.jetbrains.annotations.Nullable;
 
 import javax.swing.*;
 import java.util.Arrays;
+import java.util.Collections;
 import java.util.stream.Collectors;
 
 public class ProtocConfigurable implements Configurable {
@@ -16,7 +17,7 @@ public class ProtocConfigurable implements Configurable {
     @Nls(capitalization = Nls.Capitalization.Title)
     @Override
     public String getDisplayName() {
-        return "Protoc settings";
+        return "Protoc Settings";
     }
 
     @Override
@@ -27,16 +28,16 @@ public class ProtocConfigurable implements Configurable {
     @Nullable
     @Override
     public JComponent createComponent() {
-        component = new ProtocConfigComponent();
-        return component.panel;
+        return (component = new ProtocConfigComponent()).panel;
     }
 
     @Override
     public boolean isModified() {
         ProtocConfigState state = ProtocConfigState.getInstance();
-        return modified(state.outdir, component.outdir.getText()) ||
-                modified(String.join(";", state.options), component.options.getText()) ||
-                modified(state.protoc, component.protoc.getText());
+        return state.showCmd != component.showCmd.isSelected()
+            || modified(state.outdir, component.outdir.getText())
+            || modified(state.protoc, component.protoc.getText())
+            || modified(String.join(";", state.options), component.options.getText());
     }
 
     public boolean modified(String origin, String current) {
@@ -47,17 +48,16 @@ public class ProtocConfigurable implements Configurable {
     public void apply() {
         String text;
         ProtocConfigState state = ProtocConfigState.getInstance();
-        if(!Strings.isEmptyOrSpaces(text = component.outdir.getText()))
-            state.outdir = text.trim();
-        if(!Strings.isEmptyOrSpaces(text = component.options.getText()))
-            state.options = Arrays.asList(text.trim().split(";")).stream().map(String::trim).collect(Collectors.toList());
-        if(!Strings.isEmptyOrSpaces(text = component.protoc.getText()))
-            state.protoc = text.trim();
+        state.showCmd = component.showCmd.isSelected();
+        state.outdir = Strings.isEmptyOrSpaces(text = component.outdir.getText()) ? null : text.trim();
+        state.protoc = Strings.isEmptyOrSpaces(text = component.protoc.getText()) ? null : text.trim();
+        state.options = Strings.isEmptyOrSpaces(text = component.options.getText()) ? Collections.emptyList() : Arrays.stream(text.trim().split(";")).map(String::trim).collect(Collectors.toList());
     }
 
     @Override
     public void reset() {
         ProtocConfigState state = ProtocConfigState.getInstance();
+        component.showCmd.setSelected(state.showCmd);
         component.outdir.setText(state.outdir);
         component.options.setText(String.join(";", state.options));
         component.protoc.setText(state.protoc);

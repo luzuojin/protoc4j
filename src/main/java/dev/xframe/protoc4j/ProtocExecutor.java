@@ -17,9 +17,11 @@ public class ProtocExecutor {
     public static class ExecResp {
         public final boolean ok;
         public final String msg;
-        public ExecResp(boolean ok, String msg) {
+        public final String cmd;
+        public ExecResp(boolean ok, String msg, String cmd) {
             this.ok = ok;
             this.msg = msg;
+            this.cmd = cmd;
         }
     }
 
@@ -37,7 +39,7 @@ public class ProtocExecutor {
     }
 
     private static String ensureProtoc(ProtocConfigState config) throws IOException, InterruptedException {
-        if(!Strings.isEmpty(config.protoc) && Files.exists(Paths.get(config.protoc))) {
+        if(!Strings.isEmptyOrSpaces(config.protoc) && Files.exists(Paths.get(config.protoc))) {
             return config.protoc;
         }
         boolean isWindows = isWindows();
@@ -74,7 +76,7 @@ public class ProtocExecutor {
             StringBuilder sb = new StringBuilder(status).append("\n");
             while(reader.ready())
                 sb.append(reader.readLine()).append("\n");
-            return status == 0 ? new ExecResp(true, "OK") : new ExecResp(false, sb.toString());
+            return status == 0 ? new ExecResp(true, "OK", cmd) : new ExecResp(false, sb.toString(), cmd);
         }
     }
 

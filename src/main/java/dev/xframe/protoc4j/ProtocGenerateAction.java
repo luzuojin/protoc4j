@@ -34,6 +34,7 @@ public class ProtocGenerateAction extends AnAction {
         DataContext dataCtx = e.getDataContext();
         VirtualFile file = PlatformDataKeys.VIRTUAL_FILE.getData(dataCtx);
         if(isProtoFile(file)) {//current selected .proto file
+            String msg;
             try {
                 Module module = PlatformDataKeys.MODULE.getData(dataCtx);
                 ProtocConfigState config = ProtocConfigState.getInstance();//get from data
@@ -42,10 +43,11 @@ public class ProtocGenerateAction extends AnAction {
                 ProtocExecutor.ExecResp resp = ProtocExecutor.exec(config, inDirs.stream().map(VirtualFile::getPath).collect(Collectors.toList()), outDir.getPath(), file.getPath());
                 if(resp.ok)
                     VfsUtil.markDirtyAndRefresh(true, true,true, outDir);
-                Messages.showMessageDialog(e.getProject(), resp.msg, e.getPresentation().getText(), e.getPresentation().getIcon());
+                msg = config.showCmd ? resp.cmd + "\t" + resp.msg : resp.msg;
             } catch (Throwable ex) {
-                Messages.showMessageDialog(e.getProject(), throwableToString(ex), e.getPresentation().getText(), e.getPresentation().getIcon());
+                msg = throwableToString(ex);
             }
+            Messages.showMessageDialog(e.getProject(), msg, e.getPresentation().getText(), e.getPresentation().getIcon());
         }
     }
 

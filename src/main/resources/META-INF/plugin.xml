@@ -22,7 +22,7 @@
         <applicationConfigurable parentId="tools"
                                  id="dev.xframe.protoc4j.ProtocConfigurable"
                                  instance="dev.xframe.protoc4j.ProtocConfigurable"
-                                 displayName="Protoc config"/>
+                                 displayName="Protoc Config"/>
         <applicationService serviceImplementation="dev.xframe.protoc4j.ProtocConfigState"/>
     </extensions>
 
