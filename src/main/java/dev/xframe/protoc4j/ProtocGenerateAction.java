@@ -1,6 +1,5 @@
 package dev.xframe.protoc4j;
 
-import com.intellij.history.core.Paths;
 import com.intellij.openapi.actionSystem.AnAction;
 import com.intellij.openapi.actionSystem.AnActionEvent;
 import com.intellij.openapi.actionSystem.DataContext;
@@ -8,7 +7,9 @@ import com.intellij.openapi.actionSystem.PlatformDataKeys;
 import com.intellij.openapi.module.Module;
 import com.intellij.openapi.roots.ModuleRootManager;
 import com.intellij.openapi.roots.ProjectFileIndex;
+import com.intellij.openapi.roots.ProjectRootManager;
 import com.intellij.openapi.ui.Messages;
+import com.intellij.openapi.util.text.Strings;
 import com.intellij.openapi.vfs.LocalFileSystem;
 import com.intellij.openapi.vfs.VfsUtil;
 import com.intellij.openapi.vfs.VirtualFile;
@@ -16,6 +17,8 @@ import org.jetbrains.annotations.NotNull;
 
 import java.io.PrintWriter;
 import java.io.StringWriter;
+import java.nio.file.Path;
+import java.nio.file.Paths;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
@@ -37,9 +40,9 @@ public class ProtocGenerateAction extends AnAction {
             String msg;
             try {
                 Module module = PlatformDataKeys.MODULE.getData(dataCtx);
-                ProtocConfigState config = ProtocConfigState.getInstance();//get from data
+                ProtocConfigState config = ProtocConfigState.getInstance(e.getProject());//get from data
                 VirtualFile outDir = getOutputDir(module, config);
-                List<VirtualFile> inDirs = getInputDirs(module, file);
+                List<VirtualFile> inDirs = getInputDirs(module, file, config);
                 ProtocExecutor.ExecResp resp = ProtocExecutor.exec(config, inDirs.stream().map(VirtualFile::getPath).collect(Collectors.toList()), outDir.getPath(), file.getPath());
                 if(resp.ok)
                     VfsUtil.markDirtyAndRefresh(true, true,true, outDir);
@@ -51,28 +54,39 @@ public class ProtocGenerateAction extends AnAction {
         }
     }
 
-    private List<VirtualFile> getInputDirs(Module module, VirtualFile protoFile) {
-        VirtualFile protoDir = protoFile.getParent();
+    private List<VirtualFile> getInputDirs(Module module, VirtualFile protoFile, ProtocConfigState config) {
+        VirtualFile protoDir = Strings.isEmptyOrSpaces(config.protodir) ? protoFile.getParent() : virtualPath(module, config.protodir);
         VirtualFile protoRoot = ProjectFileIndex.getInstance(module.getProject()).getContentRootForFile(protoFile);
-        String protoRelative = Paths.relativeIfUnder(protoDir.getPath(), protoRoot.getPath());
+        String protoRelative = relativeIfUnder(protoRoot, protoDir);
         ModuleRootManager moduleRoot = ModuleRootManager.getInstance(module);
-        List<VirtualFile> conentRoots = new ArrayList<>();
-        Arrays.stream(moduleRoot.getContentRoots()).forEach(conentRoots::add);
+        List<VirtualFile> contentRoots = new ArrayList<>(Arrays.asList(moduleRoot.getContentRoots()));
         Arrays.stream(moduleRoot.getDependencies()).map(ModuleRootManager::getInstance).forEach(dependence -> {
-            Arrays.stream(dependence.getContentRoots()).forEach(conentRoots::add);
+            contentRoots.addAll(Arrays.asList(dependence.getContentRoots()));
         });
-        return conentRoots.stream().map(f->f.findFileByRelativePath(protoRelative)).filter(Objects::nonNull).collect(Collectors.toList());
+        return contentRoots.stream().map(f->f.findFileByRelativePath(protoRelative)).filter(Objects::nonNull).collect(Collectors.toList());
+    }
+    private static String relativeIfUnder(VirtualFile protoRoot, VirtualFile protoDir) {
+        if(protoRoot == null) return null;
+        Path rootPath = Paths.get(protoRoot.getPath()).normalize();
+        Path protPath = Paths.get(protoDir.getPath()).normalize();
+        return protPath.startsWith(rootPath) ? rootPath.relativize(protPath).toString() : null;
     }
 
     private VirtualFile getOutputDir(Module module, ProtocConfigState config) {
         return config.getPossibleOutDirs().stream()
-                .map(path->this.getOutputDir(module, path))
+                .map(path->this.virtualPath(module, path))
                 .filter(Objects::nonNull)
                 .findFirst()
                 .orElseThrow(()->new IllegalStateException(String.format("Protoc out dir not found in module[%s]", module.getName())));
     }
-    private VirtualFile getOutputDir(Module module, String possiblePath) {
+    private VirtualFile virtualPath(Module module, String possiblePath) {
         for (VirtualFile contentRoot : ModuleRootManager.getInstance(module).getContentRoots()) {
+            VirtualFile out = contentRoot.findFileByRelativePath(possiblePath);
+            if(out != null) {
+                return out;
+            }
+        }
+        for (VirtualFile contentRoot : ProjectRootManager.getInstance(module.getProject()).getContentRoots()) {
             VirtualFile out = contentRoot.findFileByRelativePath(possiblePath);
             if(out != null) {
                 return out;

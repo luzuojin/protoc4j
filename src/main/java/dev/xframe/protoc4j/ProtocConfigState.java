@@ -1,9 +1,9 @@
 package dev.xframe.protoc4j;
 
-import com.intellij.openapi.application.ApplicationManager;
 import com.intellij.openapi.components.PersistentStateComponent;
 import com.intellij.openapi.components.State;
 import com.intellij.openapi.components.Storage;
+import com.intellij.openapi.project.Project;
 import com.intellij.openapi.util.text.Strings;
 import com.intellij.util.xmlb.XmlSerializerUtil;
 import org.jetbrains.annotations.NotNull;
@@ -21,6 +21,8 @@ import java.util.stream.Stream;
 public class ProtocConfigState implements PersistentStateComponent<ProtocConfigState> {
 
     static final String[] DefaultOutDirs = new String[]{"src/main/proto", "src/main/java", "src"};
+
+    public String protodir;
 
     public String outdir;
 
@@ -41,8 +43,8 @@ public class ProtocConfigState implements PersistentStateComponent<ProtocConfigS
         return options;
     }
 
-    public static ProtocConfigState getInstance() {
-        return ApplicationManager.getApplication().getService(ProtocConfigState.class);
+    public static ProtocConfigState getInstance(Project project) {
+        return project.getService(ProtocConfigState.class);
     }
 
     @Nullable

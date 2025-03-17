@@ -19,11 +19,11 @@
     <depends>com.intellij.modules.platform</depends>
 
     <extensions defaultExtensionNs="com.intellij">
-        <applicationConfigurable parentId="tools"
+        <projectConfigurable parentId="tools"
                                  id="dev.xframe.protoc4j.ProtocConfigurable"
                                  instance="dev.xframe.protoc4j.ProtocConfigurable"
                                  displayName="Protoc Config"/>
-        <applicationService serviceImplementation="dev.xframe.protoc4j.ProtocConfigState"/>
+        <projectService serviceImplementation="dev.xframe.protoc4j.ProtocConfigState"/>
     </extensions>
 
     <actions>

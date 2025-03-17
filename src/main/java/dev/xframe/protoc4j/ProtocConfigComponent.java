@@ -14,6 +14,7 @@ public class ProtocConfigComponent {
 
     final JPanel panel;
 
+    final JBTextField protodir = new JBTextField();
     final JBTextField outdir = new JBTextField();
     final JBTextField options = new JBTextField();
     final JBCheckBox showCmd = new JBCheckBox();
@@ -22,12 +23,13 @@ public class ProtocConfigComponent {
     public ProtocConfigComponent() {
         protoc.addBrowseFolderListener(new TextBrowseFolderListener(new FileChooserDescriptor(true, false, false, false, false, false)));
         panel = FormBuilder.createFormBuilder()
-                .addLabeledComponent(new JBLabel("Protoc"), protoc, 1, false)
-                .addLabeledComponent(new JBLabel("OutDir"), outdir, 1, false)
-                .addLabeledComponent(new JBLabel("Options"), options, 1, false)
-                .addLabeledComponent(new JBLabel("ShowCmd"), showCmd, 1, false)
-                .addComponentFillVertically(new JPanel(), 0)
-                .getPanel();
+            .addLabeledComponent(new JBLabel("Protoc"), protoc, 1, false)
+            .addLabeledComponent(new JBLabel("ProtoDir"), protodir, 1, false)
+            .addLabeledComponent(new JBLabel("OutDir"), outdir, 1, false)
+            .addLabeledComponent(new JBLabel("Options"), options, 1, false)
+            .addLabeledComponent(new JBLabel("ShowCmd"), showCmd, 1, false)
+            .addComponentFillVertically(new JPanel(), 0)
+            .getPanel();
     }
 
 }
