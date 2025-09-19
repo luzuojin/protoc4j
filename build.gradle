@@ -1,9 +1,9 @@
 plugins {
-    id 'org.jetbrains.intellij' version '1.3.0'
+    id 'org.jetbrains.intellij' version '1.3.1'
 }
 
 group 'dev.xframe'
-version '1.0.5'
+version '1.0.6'
 
 // See https://github.com/JetBrains/gradle-intellij-plugin/
 intellij {
@@ -12,6 +12,7 @@ intellij {
 }
 patchPluginXml {
     changeNotes = """
+    1.0.6: Fix can`t load config<br/>
     1.0.5: Add proto dir and Change config to Project scope<br/>
     1.0.4: Fix can`t change config<br/>
     1.0.3: Add builtin macos arm protoc<br/>

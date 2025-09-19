@@ -55,7 +55,7 @@ public class ProtocConfigState implements PersistentStateComponent<ProtocConfigS
 
     @Override
     public void loadState(@NotNull ProtocConfigState state) {
-        XmlSerializerUtil.copyBean(this, state);
+        XmlSerializerUtil.copyBean(state, this);
     }
 
 }
